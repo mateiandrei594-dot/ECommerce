@@ -6,8 +6,6 @@ This repository contains a highly normalized, robust SQL Server database archite
 ## Database Architecture
 The schema is designed in Third Normal Form (3NF) to separate logical business domains: Users, Products, Categories, Warehouses, and Order Lifecycles. An independent Audit Log table is implemented to track historical data mutations without interfering with core referential integrity constraints.
 
-![ER Diagram](screenshots/Diagram.jpeg)
-
 ## Core Technical Implementations
 
 ### Concurrency Control and Lock Management
@@ -26,12 +24,6 @@ In high-traffic e-commerce environments, race conditions can lead to overselling
 To optimize reporting queries (such as filtering orders by specific operational statuses), execution plans were analyzed to eliminate expensive table scans. 
 
 By implementing a Nonclustered Covering Index that includes frequently accessed columns (Client ID, Date, Total Value), the SQL Server Query Optimizer transitioned from a resource-intensive Clustered Index Scan to a highly efficient Index Seek, bypassing Key Lookups.
-
-**Execution Plan Before Indexing (Clustered Index Scan - High Cost)**
-![Execution Plan Before](screenshots/index_scan_before.jpeg)
-
-**Execution Plan After Indexing (Index Seek - Optimized)**
-![Execution Plan After](screenshots/index_seek_after.jpeg)
 
 ## Repository Structure
 The project is modularized for clarity and maintainability:
