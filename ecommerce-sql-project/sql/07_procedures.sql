@@ -233,44 +233,58 @@ CREATE OR ALTER PROCEDURE usp_ReaprovizionareDepozite
     @CantiD3   int = 0
 AS
 BEGIN
-    SET NOCOUNT ON
+    SET NOCOUNT ON;
 
     BEGIN TRY
-        BEGIN TRANSACTION Reaprovizionare
+        BEGIN TRANSACTION Reaprovizionare;
 
-        SAVE TRANSACTION SaveD1
-        IF EXISTS (SELECT 1 FROM STOC_DEPOZIT WHERE IdProdus=@IdProdus AND IdDepozit=1)
-            UPDATE STOC_DEPOZIT SET Cantitate = Cantitate + @CantiD1
-            WHERE  IdProdus=@IdProdus AND IdDepozit=1
-        ELSE
-            INSERT INTO STOC_DEPOZIT(IdProdus, IdDepozit, Cantitate)
-            VALUES (@IdProdus, 1, @CantiD1)
+        BEGIN TRY
+            SAVE TRANSACTION SaveD1;
+            IF EXISTS (SELECT 1 FROM STOC_DEPOZIT WHERE IdProdus=@IdProdus AND IdDepozit=1)
+                UPDATE STOC_DEPOZIT SET Cantitate = Cantitate + @CantiD1
+                WHERE  IdProdus=@IdProdus AND IdDepozit=1;
+            ELSE
+                INSERT INTO STOC_DEPOZIT(IdProdus, IdDepozit, Cantitate)
+                VALUES (@IdProdus, 1, @CantiD1);
+        END TRY
+        BEGIN CATCH
+            IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION SaveD1;
+        END CATCH
 
-        SAVE TRANSACTION SaveD2
-        IF EXISTS (SELECT 1 FROM STOC_DEPOZIT WHERE IdProdus=@IdProdus AND IdDepozit=2)
-            UPDATE STOC_DEPOZIT SET Cantitate = Cantitate + @CantiD2
-            WHERE  IdProdus=@IdProdus AND IdDepozit=2
-        ELSE
-            INSERT INTO STOC_DEPOZIT(IdProdus, IdDepozit, Cantitate)
-            VALUES (@IdProdus, 2, @CantiD2)
+        BEGIN TRY
+            SAVE TRANSACTION SaveD2;
+            IF EXISTS (SELECT 1 FROM STOC_DEPOZIT WHERE IdProdus=@IdProdus AND IdDepozit=2)
+                UPDATE STOC_DEPOZIT SET Cantitate = Cantitate + @CantiD2
+                WHERE  IdProdus=@IdProdus AND IdDepozit=2;
+            ELSE
+                INSERT INTO STOC_DEPOZIT(IdProdus, IdDepozit, Cantitate)
+                VALUES (@IdProdus, 2, @CantiD2);
+        END TRY
+        BEGIN CATCH
+            IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION SaveD2;
+        END CATCH
 
-        SAVE TRANSACTION SaveD3
-        IF EXISTS (SELECT 1 FROM STOC_DEPOZIT WHERE IdProdus=@IdProdus AND IdDepozit=3)
-            UPDATE STOC_DEPOZIT SET Cantitate = Cantitate + @CantiD3
-            WHERE  IdProdus=@IdProdus AND IdDepozit=3
-        ELSE
-            INSERT INTO STOC_DEPOZIT(IdProdus, IdDepozit, Cantitate)
-            VALUES (@IdProdus, 3, @CantiD3)
+        BEGIN TRY
+            SAVE TRANSACTION SaveD3;
+            IF EXISTS (SELECT 1 FROM STOC_DEPOZIT WHERE IdProdus=@IdProdus AND IdDepozit=3)
+                UPDATE STOC_DEPOZIT SET Cantitate = Cantitate + @CantiD3
+                WHERE  IdProdus=@IdProdus AND IdDepozit=3;
+            ELSE
+                INSERT INTO STOC_DEPOZIT(IdProdus, IdDepozit, Cantitate)
+                VALUES (@IdProdus, 3, @CantiD3);
+        END TRY
+        BEGIN CATCH
+            IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION SaveD3;
+        END CATCH
 
-   
         UPDATE PRODUSE
         SET    StocTotal = (
                    SELECT SUM(Cantitate) FROM STOC_DEPOZIT
                    WHERE IdProdus = @IdProdus
                )
-        WHERE  IdProdus = @IdProdus
+        WHERE  IdProdus = @IdProdus;
 
-        COMMIT TRANSACTION Reaprovizionare
+        COMMIT TRANSACTION Reaprovizionare;
 
         SELECT
             p.Denumire              AS Produs,
@@ -280,12 +294,12 @@ BEGIN
         FROM PRODUSE p
         INNER JOIN STOC_DEPOZIT sd ON p.IdProdus   = sd.IdProdus
         INNER JOIN DEPOZITE     d  ON sd.IdDepozit = d.IdDepozit
-        WHERE p.IdProdus = @IdProdus
+        WHERE p.IdProdus = @IdProdus;
 
     END TRY
     BEGIN CATCH
-        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
-        THROW
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION Reaprovizionare;
+        THROW;
     END CATCH
 END
 GO
